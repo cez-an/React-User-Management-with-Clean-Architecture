@@ -13,6 +13,8 @@ export class SignupUseCase {
   async execute(name: string, email: string, password: string): Promise<User> {
     
     const existing = await this._userRepo.findByEmail(email);
+
+
     if (existing) throw new Error("User already exists");
     const hashedPassword = await this._passwordHasher.hash(password);
     const id = this._idGenerator.generate();

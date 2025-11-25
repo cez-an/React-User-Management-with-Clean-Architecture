@@ -8,9 +8,13 @@ export class LoginUseCase {
     private _passwordHasher: IPasswordHasher
   ) {}
 
-  async execute(email: string, password: string): Promise <User | null> {
+  async execute(email: string, password: string): Promise <User | null > {
     const user = await this._userRepo.findByEmail(email);
+    
     if (!user) return null;
+    if (user.isBlocked) {
+    throw new Error("User is blocked by admin");
+  }
     const isPasswordTrue = await this._passwordHasher.compare(
       password,
       user.password

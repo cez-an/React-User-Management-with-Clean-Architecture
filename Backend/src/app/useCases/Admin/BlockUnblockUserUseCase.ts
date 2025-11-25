@@ -1,7 +1,6 @@
 import { IUserRepository } from "../../repositories/IUserRepository";
 
 export class BlockUnblockUserUseCase {
-  
   constructor(private userRepo: IUserRepository) {}
 
   async execute(userId: string, action: "block" | "unblock"): Promise<void> {

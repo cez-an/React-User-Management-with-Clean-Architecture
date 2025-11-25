@@ -10,8 +10,8 @@ export interface IUserRepository {
 
   findAll(): Promise<User[]>;
 
-  blockUser(id: string): Promise<void>;
+  blockUser(userId: any): Promise<void>;
 
-  unblockUser(id:string) : Promise<void>;
+  unblockUser(userId: any) : Promise<void>;
 
 }

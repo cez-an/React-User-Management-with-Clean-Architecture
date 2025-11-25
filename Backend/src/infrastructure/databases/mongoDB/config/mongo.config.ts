@@ -7,7 +7,7 @@ export class MongoConnection {
   static async connect(): Promise<void> { //Static methods on a class can be called on the class itself without creating an instance
     try {
     
-      await mongoose.connect(process.env.MONGO_URI as string);
+      await mongoose.connect(process.env.MONGODB_URI as string);
       console.log(
         `
    ✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️✳️

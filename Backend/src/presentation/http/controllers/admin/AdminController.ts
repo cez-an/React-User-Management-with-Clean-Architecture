@@ -12,11 +12,11 @@ export class AdminController {
     
   async listUsers(req: Request, res: Response) {
     try {
-      if (!req.session.admin) {
-        return res
-          .status(HttpStatusCode.UNAUTHORIZED)
-          .json({ error: "Unauthorized" });
-      }
+      // if (!req.session.admin) {
+      //   return res
+      //     .status(HttpStatusCode.UNAUTHORIZED)
+      //     .json({ error: "Unauthorized" });
+      // }
       const users = await listUsersUseCase.execute();
 
       res.status(HttpStatusCode.OK).json(users);
@@ -30,6 +30,7 @@ export class AdminController {
   async blockUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
+      console.log(id,"admincontroller id")
       await blockUnblockUseCase.execute(id, "block");
       res
         .status(HttpStatusCode.OK)

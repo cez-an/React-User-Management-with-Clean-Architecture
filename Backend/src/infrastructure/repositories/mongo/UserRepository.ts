@@ -10,8 +10,16 @@ export class UserRepository implements IUserRepository {
     return userMapper.toUserDTO(createdUser);
   }
 
+  async updateUser(userId:string,data:any){
+    return await UserModal.findOneAndUpdate(
+      {userId},
+      {$set:data},
+      {new:true}
+    )
+  }
+
   async findByEmail(email: string): Promise <User | null> {
-    const userDoc = await UserModal.findOne({email})
+    const userDoc = await UserModal.findOne({email});
     return userDoc ? userMapper.toUserDTO(userDoc) : null;
   }
 
@@ -25,12 +33,12 @@ export class UserRepository implements IUserRepository {
     return userMapper.toAllUserDTO(userDoc);
   }
 
-  async blockUser(id: string): Promise <void> {
-    await UserModal.findByIdAndUpdate(id,{isBlocked:true})
+  async blockUser(userId: string): Promise <void> {
+    await UserModal.findOneAndUpdate({userId},{isBlocked:true})
   }
 
-  async unblockUser(id: string): Promise <void> {
-    await UserModal.findByIdAndUpdate(id,{isBlocked:false})
+  async unblockUser(userId: string): Promise <void> {
+    await UserModal.findOneAndUpdate({userId},{isBlocked:false})
   }
 
   

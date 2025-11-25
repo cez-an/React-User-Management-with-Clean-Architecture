@@ -12,8 +12,10 @@ export class AuthController {
   async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
-      console.log(email, password);
       const user = await loginUserCase.execute(email, password);
+
+      console.log(user?.profileImage,"logIN CONTOLLER");
+      
       if (!user) {
         return res
           .status(HttpStatusCode.UNAUTHORIZED)
@@ -25,11 +27,21 @@ export class AuthController {
           .json({ error: "Invalid credentials" });
       }
       req.session.user = {
-        id: user.userId,
+        name: user.name,
         email: user.email,
         role: user.role,
       };
-      res.status(HttpStatusCode.OK).json({ message: "Login Successfull" });
+
+      res.status(HttpStatusCode.OK).json({
+        message: "Login Successfull",
+        user: {
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          id:user.userId,
+          profileImage: user.profileImage,
+        },
+      });
     } catch (error) {
       res
         .status(HttpStatusCode.UNAUTHORIZED)

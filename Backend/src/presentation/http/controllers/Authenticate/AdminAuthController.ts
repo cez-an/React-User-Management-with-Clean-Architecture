@@ -14,6 +14,7 @@ export class AdminAuthController {
       const { email, password } = req.body;
 
       const user = await loginUseCase.execute(email, password);
+      
       if (!user) {
         return res
           .status(HttpStatusCode.UNAUTHORIZED)
@@ -29,7 +30,7 @@ export class AdminAuthController {
       req.session.admin = { id: user.userId, email: user.email, role: "admin" };
       return res
         .status(HttpStatusCode.OK)
-        .json({ message: "Admin login successful" });
+        .json({ message: "Admin login successful",admin:{id: user.userId, email: user.email,role:user.role}});
     } catch (error) {
       return res
         .status(HttpStatusCode.UNAUTHORIZED)
