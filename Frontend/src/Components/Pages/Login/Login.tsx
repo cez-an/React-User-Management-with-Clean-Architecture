@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import { useAppDispatch } from "../../../hooks";
+import { login } from "../../../features/auth/authSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
@@ -10,6 +11,7 @@ type LoginForm = {
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const {
     register,
@@ -19,18 +21,16 @@ const Login = () => {
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      const res = await axios.post("http://localhost:3000/auth/login", data);
+      const user = await dispatch(login(data)).unwrap();
 
-      toast.success(res.data.message, {
+      toast.success("Login successful!", {
         position: "bottom-right",
         theme: "dark",
       });
 
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      
       navigate("/home");
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Invalid credentials", {
+      toast.error(error || "Invalid credentials", {
         position: "bottom-right",
         theme: "dark",
       });
@@ -39,6 +39,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex">
+      {/* LEFT SECTION */}
       <div className="hidden md:block md:w-1/2 relative bg-black">
         <div className="absolute inset-0 bg-black flex items-center justify-center">
           <h1 className="md:text-8xl text-4xl font-extrabold text-white drop-shadow-xl">
@@ -47,6 +48,7 @@ const Login = () => {
         </div>
       </div>
 
+      {/* RIGHT SECTION (LOGIN FORM) */}
       <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50 px-6">
         <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-xl border">
           <h2 className="text-3xl font-bold text-center mb-3">Welcome Back</h2>
@@ -55,6 +57,7 @@ const Login = () => {
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Email */}
             <div>
               <label className="block mb-1 font-medium text-gray-700">
                 Email Address
@@ -82,10 +85,12 @@ const Login = () => {
               )}
             </div>
 
+            {/* Password */}
             <div>
               <label className="block mb-1 font-medium text-gray-700">
                 Password
               </label>
+              
               <input
                 type="password"
                 placeholder="Enter your password"
@@ -109,6 +114,7 @@ const Login = () => {
               )}
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -121,6 +127,7 @@ const Login = () => {
             </button>
           </form>
 
+          {/* Signup redirect */}
           <p className="text-center mt-6 text-gray-600">
             Create an account?{" "}
             <button

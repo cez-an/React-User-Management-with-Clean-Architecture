@@ -1,15 +1,12 @@
 import { Navigate } from "react-router-dom";
+import { useAppSelector } from "../hooks";
+import { selectCurrentUser } from "../features/auth/authSlice";
 
 const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  
+  const user = useAppSelector(selectCurrentUser);
 
-  const admin = JSON.parse(localStorage.getItem("admin") || "null");
-
-
-  if (!admin) {
-    return <Navigate to="/admin/login" replace />;
-  }
-
-  if (admin.role !== "admin") {
+  if (!user || user.role !== "admin") {
     return <Navigate to="/admin/login" replace />;
   }
 

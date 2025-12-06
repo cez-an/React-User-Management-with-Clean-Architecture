@@ -1,13 +1,15 @@
 import { Navigate } from "react-router-dom";
+import { useAppSelector } from "../hooks";
+import { selectIsAuthenticated } from "../features/auth/authSlice";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const user = localStorage.getItem("user");
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 

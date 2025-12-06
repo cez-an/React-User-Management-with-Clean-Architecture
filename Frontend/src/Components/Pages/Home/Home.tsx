@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { images } from "../../../assets/images";
 import axios from "axios";
+import { useAppDispatch } from "../../../hooks";
+import { logout } from "../../../features/auth/authSlice";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -42,13 +44,10 @@ useEffect(() => {
 }, []);
 
 
+ const dispatch = useAppDispatch();
+
   const handleLogout = () => {
-    toast.error("Logged Out successfully", {
-      position: "bottom-right",
-      theme: "dark",
-    });
-    localStorage.removeItem("user");
-    navigate("/login");
+    dispatch(logout());
   };
 
   return (
