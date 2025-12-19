@@ -1,50 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { images } from "../../../assets/images";
-import axios from "axios";
-import { useAppDispatch } from "../../../hooks";
-import { logout } from "../../../features/auth/authSlice";
+import { useAppDispatch ,useAppSelector } from "../../../hooks";
+import { logout,fetchCurrentUser,selectCurrentUser,selectIsAuthenticated } from "../../../features/auth/authSlice";
 
 const Home = () => {
+
   const navigate = useNavigate();
   const [openDropdown, setOpenDropdown] = useState(false);
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectCurrentUser)
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  const [user, setUser] = useState<{
-    profileImage: string;
-    email: string;
-    id: string;
-    role: string;
-    name: string;
-  }>({
-    email: "",
-    id: "",
-    name: "",
-    role: "",
-    profileImage: ""
-  });
 
-useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const data = await JSON.parse(localStorage.getItem("user") || "{}");
-      const res = await axios.get(`http://localhost:3000/user/findUser/${data.email}`);
-      
-      if(res.data.user.isBlocked){
-        localStorage.clear();
-        navigate('/login');
-      }
-      
-    } catch (err) {
-      console.error(err);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      dispatch(fetchCurrentUser())
+        .unwrap()
+        .catch(() => navigate("/login"));
     }
-  };
-
-  fetchUser();
-}, []);
+  }, [dispatch, isAuthenticated, navigate]);
 
 
- const dispatch = useAppDispatch();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -59,7 +36,7 @@ useEffect(() => {
        
         <div className="relative">
           <img
-             src={user.profileImage || "https://i.pravatar.cc/150?img=3"}
+             src={user && user.profileImage || "https://i.pravatar.cc/150?img=3"}
             alt="Profile"
             className="w-10 h-10 rounded-full object-cover border border-gray-600 shadow cursor-pointer"
             onClick={() => setOpenDropdown(!openDropdown)}
@@ -93,7 +70,7 @@ useEffect(() => {
       <div className="px-10 py-8 bg-black/5 min-h-screen text-gray-800">
         <h2 className="text-xl text-gray-600 mb-2">
           Welcome back,
-          <span className="font-semibold text-gray-900"> {user.name}</span>
+          <span className="font-semibold text-gray-900"> {user && user.name}</span>
         </h2>
 
         <div className="space-y-14 mt-6">

@@ -10,7 +10,8 @@ const UserSchema: Schema = new Schema<IUserDocument>(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
-    isBlocked: { type: Boolean, default: false },    
+    isBlocked: { type: Boolean, default: false },  
+    refreshToken: { type: String },  
     profileImage: {
       type: String,
       default: "https://i.pravatar.cc/150?img=1", 

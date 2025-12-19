@@ -7,8 +7,9 @@ interface PublicRouteProps {
 }
 
 const PublicRoute = ({ children }: PublicRouteProps) => {
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  console.log("isAuthenticated",isAuthenticated)
   if (isAuthenticated) {
     return <Navigate to="/home" replace />;
   }

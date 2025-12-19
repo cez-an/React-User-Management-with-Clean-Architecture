@@ -7,7 +7,9 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  console.log("isAuthenticated",isAuthenticated)
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

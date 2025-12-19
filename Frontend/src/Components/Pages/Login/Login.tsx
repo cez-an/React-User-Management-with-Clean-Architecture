@@ -22,6 +22,7 @@ const Login = () => {
   const onSubmit = async (data: LoginForm) => {
     try {
       const user = await dispatch(login(data)).unwrap();
+      console.log("the user is",user)
 
       toast.success("Login successful!", {
         position: "bottom-right",
@@ -39,7 +40,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* LEFT SECTION */}
+      
       <div className="hidden md:block md:w-1/2 relative bg-black">
         <div className="absolute inset-0 bg-black flex items-center justify-center">
           <h1 className="md:text-8xl text-4xl font-extrabold text-white drop-shadow-xl">
@@ -48,7 +49,7 @@ const Login = () => {
         </div>
       </div>
 
-      {/* RIGHT SECTION (LOGIN FORM) */}
+      
       <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50 px-6">
         <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-xl border">
           <h2 className="text-3xl font-bold text-center mb-3">Welcome Back</h2>
@@ -57,7 +58,7 @@ const Login = () => {
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Email */}
+            
             <div>
               <label className="block mb-1 font-medium text-gray-700">
                 Email Address
@@ -85,7 +86,7 @@ const Login = () => {
               )}
             </div>
 
-            {/* Password */}
+            
             <div>
               <label className="block mb-1 font-medium text-gray-700">
                 Password
@@ -114,7 +115,7 @@ const Login = () => {
               )}
             </div>
 
-            {/* Submit */}
+            
             <button
               type="submit"
               disabled={isSubmitting}
@@ -127,7 +128,7 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Signup redirect */}
+          
           <p className="text-center mt-6 text-gray-600">
             Create an account?{" "}
             <button
@@ -146,5 +147,9 @@ const Login = () => {
     </div>
   );
 };
+
+
+
+
 
 export default Login;

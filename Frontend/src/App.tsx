@@ -24,54 +24,19 @@ function App() {
   return (
     <>
       <Routes>
-        <Route
-          path="/signup"
-          element={
-            <PublicRoute>
-              <Signup />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile/edit"
-          element={
-            <ProtectedRoute>
-              <ProfileEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/login"
-          element={
-            <PublicAdminProtectedRoute>
-              <AdminLogin />
-            </PublicAdminProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/dashboard"
-          element={
-            <AdminProtectedRoute>
-              <AdminDashboard />
-            </AdminProtectedRoute>
-          }
-        />
+
+        <Route path="/signup" element={ <PublicRoute> <Signup /> </PublicRoute> } />
+
+        <Route path="/login" element={ <PublicRoute> <Login /> </PublicRoute>   } />
+
+        <Route path="/home" element={ <ProtectedRoute> <Home /> </ProtectedRoute> } />
+
+        <Route path="/profile/edit" element={ <ProtectedRoute> <ProfileEdit /> </ProtectedRoute> } />
+
+        <Route path="/admin/login" element={ <PublicAdminProtectedRoute> <AdminLogin /> </PublicAdminProtectedRoute> } />
+
+        <Route path="/admin/dashboard" element={ <AdminProtectedRoute> <AdminDashboard /> </AdminProtectedRoute> } />
+        
       </Routes>
     </>
   );

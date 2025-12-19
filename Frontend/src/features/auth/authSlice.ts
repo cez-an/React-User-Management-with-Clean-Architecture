@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { RootState } from "../../store/store";
+import api from "../../api/axios";
+import axios from "axios";
 
 export type UserRole = "user" | "admin";
 
@@ -8,13 +10,15 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  profileImage?: string;
 }
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  status: "idle" | "loading" | "succeeded" | "falied";
+  status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+   profileImage?: string;
 }
 
 const initialState: AuthState = {
@@ -30,44 +34,12 @@ export const login = createAsyncThunk<
   { rejectValue: string }
 >("auth/login", async (credentials, { rejectWithValue }) => {
   try {
-    const res = await fetch("http://localhost:3000/auth/login", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(credentials),
-    });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      return rejectWithValue(data.message || "Login failed");
-    }
-
-    const data: { user: User } = await res.json();
-    return data.user;
+    const res = await api.post<{ user: User }>("/auth/login", credentials);
+    return res.data.user;
   } catch (error) {
-    return rejectWithValue("Network error");
-  }
-});
-
-export const fetchCurrentUser = createAsyncThunk<
-  User,
-  void,
-  { rejectValue: string }
->("auth/me", async (_, { rejectWithValue }) => {
-  try {
-    const res = await fetch("http://localhost:3000/auth/me", {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      return rejectWithValue("Not authenticated");
+    if (axios.isAxiosError(error)) {
+      return rejectWithValue(error.response?.data?.message || "Login failed");
     }
-
-    const data: { user: User } = await res.json();
-    return data.user;
-  } catch {
     return rejectWithValue("Network error");
   }
 });
@@ -76,19 +48,31 @@ export const logout = createAsyncThunk<void, void, { rejectValue: string }>(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch("http://localhost:3000/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!res.ok) {
+      await api.post("/auth/logout");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
         return rejectWithValue("Logout failed");
       }
-    } catch {
       return rejectWithValue("Network error");
     }
   }
 );
+
+export const fetchCurrentUser = createAsyncThunk<
+  User,
+  void,
+  { rejectValue: string }
+>("auth/me", async (_, { rejectWithValue }) => {
+  try {
+    const res = await api.get<{ user: User }>("/auth/me");
+    return res.data.user;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return rejectWithValue("Not authenticated");
+    }
+    return rejectWithValue("Network error");
+  }
+});
 
 const authSlice = createSlice({
   name: "auth",
@@ -96,6 +80,7 @@ const authSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      /* LOGIN */
       .addCase(login.pending, (state) => {
         state.status = "loading";
         state.error = null;
@@ -106,13 +91,13 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
       })
       .addCase(login.rejected, (state, action) => {
-        state.status = "falied";
+        state.status = "failed";
         state.error = action.payload || "Login failed";
         state.user = null;
         state.isAuthenticated = false;
-      });
+      })
 
-    builder
+      /* FETCH CURRENT USER */
       .addCase(fetchCurrentUser.pending, (state) => {
         state.status = "loading";
       })
@@ -125,9 +110,9 @@ const authSlice = createSlice({
         state.status = "idle";
         state.user = null;
         state.isAuthenticated = false;
-      });
+      })
 
-    builder
+      /* LOGOUT */
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;

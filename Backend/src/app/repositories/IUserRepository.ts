@@ -13,5 +13,8 @@ export interface IUserRepository {
   blockUser(userId: any): Promise<void>;
 
   unblockUser(userId: any) : Promise<void>;
+  
+  updateRefreshToken(userId: string, token: string | null): Promise<void>;
+
 
 }

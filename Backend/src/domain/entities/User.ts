@@ -1,14 +1,12 @@
-export type Role = "user" | "admin";
-
 export interface User {
-  
   userId: string;
   name: string;
   email: string;
   password: string;
-  role: Role;
+  role: "user" | "admin";
   isBlocked: boolean;
-  profileImage?: string;    
+  refreshToken?: string;
+  profileImage?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

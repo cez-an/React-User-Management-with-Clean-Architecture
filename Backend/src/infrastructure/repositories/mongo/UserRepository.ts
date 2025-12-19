@@ -40,6 +40,10 @@ export class UserRepository implements IUserRepository {
   async unblockUser(userId: string): Promise <void> {
     await UserModal.findOneAndUpdate({userId},{isBlocked:false})
   }
+  
+  async updateRefreshToken(userId: string, token: string | null): Promise<void> {
+  await UserModal.updateOne({ userId }, { refreshToken: token });
+  }
 
   
 }

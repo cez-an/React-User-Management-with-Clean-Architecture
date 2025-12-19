@@ -1,42 +1,61 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024; 
+import { useAppDispatch, useAppSelector } from "../../../hooks";
+import {
+  selectCurrentUser,
+  fetchCurrentUser,
+  logout,
+} from "../../../features/auth/authSlice";
+
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"];
+
+interface FormValues {
+  name: string;
+  email: string;
+  profileImage?: string;
+}
 
 const ProfileEdit = () => {
   const navigate = useNavigate();
-  const [openDropdown, setOpenDropdown] = useState(false);
+  const dispatch = useAppDispatch();
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const user = useAppSelector(selectCurrentUser);
+
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string>("");
 
   const {
     register,
     handleSubmit,
-    setValue,
+    reset,
     setError,
+    setValue,
     formState: { errors },
-  } = useForm({
-    defaultValues: {
-      name: "",
-      email: "",
-      profileImage: "",
-    },
-  });
+  } = useForm<FormValues>();
 
-  const [previewImage, setPreviewImage] = useState("");
 
   useEffect(() => {
-    setValue("name", user.name);
-    setValue("email", user.email);
-    setValue("profileImage", user.profileImage || "");
-    setPreviewImage(user.profileImage);
-  }, []);
+    if (!user) {
+      dispatch(fetchCurrentUser())
+        .unwrap()
+        .catch(() => navigate("/login"));
+    } else {
+      reset({
+        name: user.name,
+        email: user.email,
+        profileImage: user.profileImage || "",
+      });
 
-  
+      setPreviewImage(user.profileImage || "");
+    }
+  }, [user, dispatch, reset, navigate]);
+
+
   const convertToBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -45,26 +64,20 @@ const ProfileEdit = () => {
       reader.onerror = reject;
     });
 
-  
-  const handleImageChange = async (event: any) => {
-    const file = event.target.files[0];
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
-    
     if (!ALLOWED_TYPES.includes(file.type)) {
-      toast.error("Only JPG or PNG images are allowed!", {
-        position: "bottom-right",
-        theme: "dark",
-      });
-      setError("profileImage", { message: "Invalid file type" });
+      toast.error("Only JPG or PNG images allowed", { theme: "dark" });
+      setError("profileImage", { message: "Invalid image type" });
       return;
     }
 
     if (file.size > MAX_IMAGE_SIZE) {
-      toast.error("Image must be less than 2 MB!", {
-        position: "bottom-right",
-        theme: "dark",
-      });
+      toast.error("Image must be under 2MB", { theme: "dark" });
       setError("profileImage", { message: "Image too large" });
       return;
     }
@@ -74,71 +87,62 @@ const ProfileEdit = () => {
     setValue("profileImage", base64);
   };
 
-  const handleLogout = () => {
-    toast.error("Logged Out successfully", {
-      position: "bottom-right",
-      theme: "dark",
-    });
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormValues) => {
     try {
-      const res = await axios.put(
-        `http://localhost:3000/user/update/${user.id}`,
-        data
+      await axios.put(
+        `http://localhost:3000/user/update/${user?.id}`,
+        data,
+        { withCredentials: true }
       );
 
-      toast.success("Profile updated!", {
-        position: "bottom-right",
-        theme: "dark",
-      });
+      toast.success("Profile updated!", { theme: "dark" });
 
-      localStorage.setItem("user", JSON.stringify(res.data.updatedUser));
+     
+      // dispatch(fetchCurrentUser());
 
       navigate("/home");
-    } catch (err) {
-      toast.error("Something went wrong!", {
-        position: "bottom-right",
-        theme: "dark",
-      });
+    } catch {
+      toast.error("Something went wrong!", { theme: "dark" });
     }
   };
 
+  /* =========================
+     LOGOUT
+     ========================= */
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
+  /* =========================
+     UI
+     ========================= */
   return (
     <>
-      
-      <nav className="w-full h-16 backdrop-blur-lg bg-black text-white flex items-center justify-between px-8 shadow-md relative">
+      {/* NAVBAR */}
+      <nav className="w-full h-16 backdrop-blur-lg bg-black text-white flex items-center justify-between px-8 shadow-md">
         <h2 className="text-2xl font-bold tracking-wide">ZANCE NEWS</h2>
 
         <div className="relative">
           <img
-            src={user.profileImage || "https://i.pravatar.cc/150?img=3"}
+            src={user?.profileImage || "https://i.pravatar.cc/150?img=3"}
             alt="Profile"
-            className="w-10 h-10 rounded-full object-cover border border-gray-600 shadow cursor-pointer"
+            className="w-10 h-10 rounded-full object-cover border cursor-pointer"
             onClick={() => setOpenDropdown(!openDropdown)}
           />
 
           {openDropdown && (
-            <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg border py-2 z-50">
+            <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow border py-2">
               <button
                 onClick={() => navigate("/profile")}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                className="w-full px-4 py-2 text-left hover:bg-gray-100"
               >
                 View Profile
               </button>
-
-              <button
-                onClick={() => navigate("/profile/edit")}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                Edit Profile
-              </button>
-
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+                className="w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
               >
                 Logout
               </button>
@@ -147,17 +151,19 @@ const ProfileEdit = () => {
         </div>
       </nav>
 
-     
+      {/* FORM */}
       <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4">
-        <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow-md border mt-10">
-          <h2 className="text-3xl font-bold mb-6 text-center">Edit Profile</h2>
+        <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow mt-10">
+          <h2 className="text-3xl font-bold mb-6 text-center">
+            Edit Profile
+          </h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            
+            {/* IMAGE */}
             <div className="flex flex-col items-center">
               <img
                 src={previewImage || "https://i.pravatar.cc/150?img=3"}
-                className="w-28 h-28 rounded-full object-cover border shadow-lg"
+                className="w-28 h-28 rounded-full object-cover border shadow"
               />
 
               <label className="mt-3 cursor-pointer text-blue-600 font-semibold">
@@ -171,37 +177,33 @@ const ProfileEdit = () => {
               </label>
 
               {errors.profileImage && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-sm">
                   {errors.profileImage.message}
                 </p>
               )}
-
-              <p className="text-xs text-gray-500 mt-1">
-                Max 2 MB (JPG or PNG)
-              </p>
             </div>
 
-            
+            {/* NAME */}
             <div>
               <label className="block font-medium mb-1">Full Name</label>
               <input
-                type="text"
                 {...register("name", {
                   required: "Name is required",
-                  minLength: { value: 3, message: "Name must be 3+ characters" },
+                  minLength: { value: 3, message: "Min 3 characters" },
                 })}
                 className="w-full border px-4 py-2 rounded-lg"
               />
               {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
-            
+            {/* EMAIL */}
             <div>
               <label className="block font-medium mb-1">Email</label>
               <input
-                type="email"
                 {...register("email", {
                   required: "Email is required",
                   pattern: {
@@ -212,14 +214,15 @@ const ProfileEdit = () => {
                 className="w-full border px-4 py-2 rounded-lg"
               />
               {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
-            
             <button
               type="submit"
-              className="w-full bg-black text-white py-2 rounded-lg font-semibold mt-4"
+              className="w-full bg-black text-white py-2 rounded-lg font-semibold"
             >
               Save Changes
             </button>
