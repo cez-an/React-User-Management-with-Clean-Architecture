@@ -58,7 +58,7 @@ const Signup = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label className="block mb-1 font-medium text-gray-700">
-                Full Name
+                 Name
               </label>
               <input
                 type="text"
