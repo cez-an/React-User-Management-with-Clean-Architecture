@@ -68,7 +68,7 @@ const Signup = () => {
                 {...register("name", {
                   required: "Full name is required",
                   minLength: {
-                    value: 3,
+                    value: 5,
                     message: "Name must be at least 3 characters",
                   },
                 })}
